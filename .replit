@@ -1,4 +1,4 @@
-entrypoint = "index.js"
+entrypoint = "README.md"
 
 hidden = [".config"]
 
