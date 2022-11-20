@@ -1,0 +1,27 @@
+{
+  "name": "mafk-bot",
+  "version": "1.0.0",
+  "description": "A Minecraft Bot to AFK on a server.",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joex92/MAFK-Bot.git"
+  },
+  "keywords": [
+    "Minecraft",
+    "AFK",
+    "Bot"
+  ],
+  "author": "JoeX92",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joex92/MAFK-Bot/issues"
+  },
+  "homepage": "https://github.com/joex92/MAFK-Bot#readme",
+  "dependencies": {
+    "mineflayer": "^4.5.1"
+  }
+}
