@@ -1,6 +1,3 @@
-/**
- * This bot example shows the basic usage of the mineflayer-pvp plugin for guarding a defined area from nearby mobs.
- */
 const fs = require('fs')
 const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
@@ -62,6 +59,7 @@ function initBot() {
       if (reason.text && reason.text.match(/[Kk][Ii][Cc][Kk]/)) {
         bot.end()
         bot.quit()
+        saveLogs()
         proccess.exit()
         return
       }
