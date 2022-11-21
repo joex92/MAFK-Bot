@@ -1,7 +1,7 @@
 /**
  * This bot example shows the basic usage of the mineflayer-pvp plugin for guarding a defined area from nearby mobs.
  */
-
+const fs = require('fs')
 const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
 const pvp = require('mineflayer-pvp').plugin
@@ -14,33 +14,30 @@ function initBot() {
     username: process.env['email'],
     //username: process.env['username'],
   })
+  bot.on('error', (err)=>{
+    console.error(err)
+    logs.push(`ERROR: ${err.errno}
+    ${err.code}
+    ${err.syscall}`)
+    saveLogs()
+  })
+  bot.on('login', console.log)
 
   bot.loadPlugin(pathfinder)
   bot.loadPlugin(pvp)
 
   let guardPos = null
-  let spawned = false;
-  let logged = false;
+  let spawned = false
+  let afk = false
+  let logs = []
 
-  bot.on('kicked', (reason, loggedIn) => {
-    console.log('reason', reason)
-    if (loggedIn) {
-      if (reason.text && reason.text.match(/[Kk][Ii][Cc][Kk]/)) {
-        bot.end()
-        bot.quit()
-        proccess.exit()
-        return
-      }
-    }
-    //setTimeout(() => initBot(), 5000)
-  })
-  bot.on('error', console.error)
-  bot.on('death', (d) => {
-    console.log('death', d);
-    //bot.end()
-  })
-  bot.on('end', () => setTimeout(() => initBot(), 5000))
-  bot.on('respawn', () => guardArea(bot.player.entity.position))
+  function saveLogs(){
+    fs.writeFile('.log', logs.join('\n'), function (err) {
+      if (err) return console.log(err);
+      console.log('Logs saved.');
+    });
+  }
+  
   // Assign the given location to be guarded
   function guardArea(pos) {
     guardPos = pos
@@ -59,6 +56,25 @@ function initBot() {
     bot.pathfinder.setGoal(new goals.GoalBlock(guardPos.x, guardPos.y, guardPos.z))
   }
 
+  bot.on('kicked', (reason, loggedIn) => {
+    console.log('reason', reason)
+    if (loggedIn) {
+      if (reason.text && reason.text.match(/[Kk][Ii][Cc][Kk]/)) {
+        bot.end()
+        bot.quit()
+        proccess.exit()
+        return
+      }
+    }
+    //setTimeout(() => initBot(), 5000)
+  })
+  bot.on('death', (d) => {
+    console.log('death', d);
+    //bot.end()
+  })
+  bot.on('end', () => setTimeout(() => initBot(), 5000))
+  bot.on('respawn', () => guardArea(bot.player.entity.position))
+
   bot.on("resourcePack", (url, hash) => {
     console.log(url, hash)
     bot.denyResourcePack()
@@ -67,9 +83,10 @@ function initBot() {
   bot.on('spawn', () => {
     if (!spawned) {
       guardArea(bot.player.entity.position)
-      setTimeout(() => bot.chat("beep boop beep boop"), 1000)
+      setTimeout(() => bot.chat("hi, I'm _AFKing_  :upside_down:"), 500)
     }
     spawned = true;
+    setTimeout(() => afk = true, 5000)
   })
 
   // Called when the bot has killed it's target.
@@ -100,7 +117,7 @@ function initBot() {
   })
 
   // Listen for player commands
-  bot.on('chat', (username, message) => {
+  bot.on("messagestr", (message, messagePosition, jsonMsg, username, verified) => {
     /* Guard the location the player is standing
     if (message === 'guard') {
       const player = bot.players[username]
@@ -119,12 +136,18 @@ function initBot() {
       bot.chat('I will no longer guard this area.')
       stopGuarding()
     } */
-    console.log('>', username, message)
-    if (message.match(bot.player.username)) {
-      bot.chat(`hey ${username}, I'm AFK. Mention me on Discord.`)
-    }
-    if (message.match(/[Ww][Bb]/)) {
-      bot.chat(`hey! thanks, I'll be AFK for a moment.`)
+    console.log(message,jsonMsg)
+    logs.push(`${jsonMsg.translate}: ${message}`)
+    if (spawned && username){
+      if (message.match(bot.player.username)) {
+        bot.chat(`hey ${username}, I'm AFK. Mention me on Discord.`)
+      }
+      if (message.match(/[Ww][Bb]/)) {
+        if ( !afk ) {
+          bot.chat(`hey ${username}! thanks, I'll be AFK for a while.`)
+        }
+      }
+      //if (message.match(/[Jj][Oo][Ii][Nn]/))
     }
   })
 }
