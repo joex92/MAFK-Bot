@@ -119,6 +119,7 @@ function initBot() {
       bot.chat('I will no longer guard this area.')
       stopGuarding()
     } */
+    console.log('>', username, message)
     if (message.match(bot.player.username)) {
       bot.chat(`hey ${username}, I'm AFK. Mention me on Discord.`)
     }
