@@ -4,7 +4,7 @@ const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
 const pvp = require('mineflayer-pvp').plugin
 
 function obj2str(obj) {
-  return JSON.stringify(obj).replaceAll('[', '[\t').replaceAll(']', '\t]').replaceAll('{', '{\t').replaceAll('}', '\t}\n').replaceAll(':', ': ').replaceAll(',', ',\t').replaceAll('\n,', ',')
+  return JSON.stringify(obj).replaceAll('[', '[\t').replaceAll(']', '\t]').replaceAll('{', '{\n\t').replaceAll('}', '\n}\n').replaceAll(':', ': ').replaceAll(',', ',\t').replaceAll('\n,', ',')
 }
 
 function logMsg(msg) {
@@ -171,5 +171,6 @@ function initBot() {
     }
   })
 }
+logMsg('')
 logMsg('Starting...')
 initBot()
