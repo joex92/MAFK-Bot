@@ -19,7 +19,7 @@ function initBot() {
     host: process.env['host'], // .env ➡ host=server.address
     port: parseInt(process.env['port']), // .env ➡ port=25565
     auth: 'microsoft',
-    username: process.env['email'], // .env ➡ email=microsoftemail@hotmail.com
+    // username: process.env['username'] // .env ➡ username=dinnerbone // in case of offline uncomment this and comment "auth" line
   })
 
   bot.on('error', (err) => {
@@ -131,7 +131,7 @@ function initBot() {
 
   // Listen for player commands
   bot.on("messagestr", (message, messagePosition, jsonMsg, username, verified) => {
-    
+
     /* Comment from used template
     Guard the location the player is standing
     if (message === 'guard') {
@@ -151,7 +151,7 @@ function initBot() {
       bot.chat('I will no longer guard this area.')
       stopGuarding()
     } */
-    
+
     console.log(message, obj2str(jsonMsg), `Health: ${hp}`)
     logs.push(`${jsonMsg.translate ? jsonMsg.translate : 'message'}: ${message}`)
     logMsg(logs[logs.length - 1])
