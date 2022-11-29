@@ -1,3 +1,4 @@
+require('dotenv').config()
 const fs = require('fs')
 const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
@@ -170,7 +171,8 @@ function initBot() {
       stopBot()
     }
   })
+  return bot;
 }
 logMsg('')
 logMsg('Starting...')
-initBot()
+console.log(initBot())
