@@ -3,8 +3,6 @@ const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
 const pvp = require('mineflayer-pvp').plugin
 
-fs.writeFileSync( '.log', '' )
-
 function initBot() {
   const bot = mineflayer.createBot({
     host: process.env['host'],
@@ -15,20 +13,21 @@ function initBot() {
     //password: process.env['password']
   })
 
-  function logMsg(msg){
-    fs.appendFileSync('.log', msg.toString(), 'utf-8');
+  function logMsg(msg) {
+    const date = new Date(Date.now()).toJSON().split(/[TZ]/)
+    fs.appendFileSync(`logs/${date[0]}.log`, `[${date[1]}] ${msg.toString()}`, 'utf-8')
   }
 
   function obj2str(obj) {
-    return JSON.stringify(obj).replaceAll('[','[\t').replaceAll(']','\t]').replaceAll('{','{\t').replaceAll('}','\t}\n').replaceAll(':',': ').replaceAll(',',',\t').replaceAll('\n,',',')
+    return JSON.stringify(obj).replaceAll('[', '[\t').replaceAll(']', '\t]').replaceAll('{', '{\t').replaceAll('}', '\t}\n').replaceAll(':', ': ').replaceAll(',', ',\t').replaceAll('\n,', ',')
   }
-  
-  bot.on('error', (err)=>{
+
+  bot.on('error', (err) => {
     console.error(err)
     let e = ''
-    Object.keys(err).forEach((v,i,a)=>{e+=`\t${v}: ${err[v]}\n`})
+    Object.keys(err).forEach((v, i, a) => { e += `\t${v}: ${err[v]}\n` })
     logs.push(`Error:\n${e}`)
-    logMsg(logs[logs.length-1])
+    logMsg(logs[logs.length - 1])
   })
   bot.on('login', console.log)
 
@@ -39,7 +38,7 @@ function initBot() {
   let spawned = false
   let afk = false
   let logs = []
-  
+
   // Assign the given location to be guarded
   function guardArea(pos) {
     guardPos = pos
@@ -61,13 +60,13 @@ function initBot() {
   bot.on('kicked', (reason, loggedIn) => {
     console.log('reason', reason)
     let r = ''
-    Object.keys(reason).forEach((v,i,a)=>{r+=`\t${v}: ${reason[v]}\n`})
-    logs.push('Kicked:\n'+r)
+    Object.keys(reason).forEach((v, i, a) => { r += `\t${v}: ${reason[v]}\n` })
+    logs.push('Kicked:\n' + r)
     if (loggedIn) {
       if (r.match(/[Kk][Ii][Cc][Kk]/)) {
         bot.end()
         bot.quit()
-        logMsg(logs[logs.length-1])
+        logMsg(logs[logs.length - 1])
         proccess.exit()
         return
       }
@@ -76,7 +75,7 @@ function initBot() {
   })
   bot.on('death', (d) => {
     console.log('death', d);
-    logs.push('Death:\t'+obj2str(bot.player.entity.position))
+    logs.push('Death:\t' + obj2str(bot.player.entity.position))
   })
   bot.on('end', () => setTimeout(() => initBot(), 5000))
   bot.on('respawn', () => guardArea(bot.player.entity.position))
@@ -143,15 +142,15 @@ function initBot() {
       bot.chat('I will no longer guard this area.')
       stopGuarding()
     } */
-    console.log(message,obj2str(jsonMsg))
+    console.log(message, obj2str(jsonMsg))
     logs.push(`${jsonMsg.translate ? jsonMsg.translate : 'message'}: ${message}\n`)
-    logMsg(logs[logs.length-1])
-    if (spawned && username){
+    logMsg(logs[logs.length - 1])
+    if (spawned && username) {
       if (message.match(bot.player.username)) {
         bot.chat(`hey ${username}, I'm AFK. Mention me on Discord.`)
       }
       if (message.match(/[Ww][Bb]/)) {
-        if ( !afk ) {
+        if (!afk) {
           bot.chat(`hey ${username}! thanks, I'll be AFK for a while.`)
         }
       }
@@ -161,5 +160,5 @@ function initBot() {
     }
   })
 }
-
+logMsg('Starting...')
 initBot()
