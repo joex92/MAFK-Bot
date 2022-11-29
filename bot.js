@@ -3,7 +3,17 @@ const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
 const pvp = require('mineflayer-pvp').plugin
 
+function obj2str(obj) {
+  return JSON.stringify(obj).replaceAll('[', '[\t').replaceAll(']', '\t]').replaceAll('{', '{\t').replaceAll('}', '\t}\n').replaceAll(':', ': ').replaceAll(',', ',\t').replaceAll('\n,', ',')
+}
+
+function logMsg(msg) {
+  const date = new Date(Date.now()).toJSON().split(/[TZ]/)
+  fs.appendFileSync(`logs/${date[0]}.log`, `[${date[1]}] ${msg.toString()}\n`, 'utf-8')
+}
+
 function initBot() {
+  let hp = 20
   const bot = mineflayer.createBot({
     host: process.env['host'],
     port: parseInt(process.env['port']),
@@ -12,15 +22,6 @@ function initBot() {
     //username: process.env['username'],
     //password: process.env['password']
   })
-
-  function logMsg(msg) {
-    const date = new Date(Date.now()).toJSON().split(/[TZ]/)
-    fs.appendFileSync(`logs/${date[0]}.log`, `[${date[1]}] ${msg.toString()}`, 'utf-8')
-  }
-
-  function obj2str(obj) {
-    return JSON.stringify(obj).replaceAll('[', '[\t').replaceAll(']', '\t]').replaceAll('{', '{\t').replaceAll('}', '\t}\n').replaceAll(':', ': ').replaceAll(',', ',\t').replaceAll('\n,', ',')
-  }
 
   bot.on('error', (err) => {
     console.error(err)
@@ -57,6 +58,14 @@ function initBot() {
     bot.pathfinder.setGoal(new goals.GoalBlock(guardPos.x, guardPos.y, guardPos.z))
   }
 
+  function stopBot() {
+    bot.end()
+    bot.quit()
+    logMsg(logs[logs.length - 1])
+    logMsg('Stopping...')
+    proccess.exit()
+  }
+
   bot.on('kicked', (reason, loggedIn) => {
     console.log('reason', reason)
     let r = ''
@@ -64,10 +73,7 @@ function initBot() {
     logs.push('Kicked:\n' + r)
     if (loggedIn) {
       if (r.match(/[Kk][Ii][Cc][Kk]/)) {
-        bot.end()
-        bot.quit()
-        logMsg(logs[logs.length - 1])
-        proccess.exit()
+        stopBot()
         return
       }
     }
@@ -76,6 +82,7 @@ function initBot() {
   bot.on('death', (d) => {
     console.log('death', d);
     logs.push('Death:\t' + obj2str(bot.player.entity.position))
+    stopBot()
   })
   bot.on('end', () => setTimeout(() => initBot(), 5000))
   bot.on('respawn', () => guardArea(bot.player.entity.position))
@@ -104,6 +111,7 @@ function initBot() {
 
   // Check for new enemies to attack
   bot.on('physicsTick', () => {
+    hp = bot.player != undefined ? bot.player.entity.metadata[9] : 20
     if (spawned && !bot.pvp.target && (guardPos != bot.player.entity.position)) {
       bot.stopDigging()
       moveToGuardPos()
@@ -142,8 +150,8 @@ function initBot() {
       bot.chat('I will no longer guard this area.')
       stopGuarding()
     } */
-    console.log(message, obj2str(jsonMsg))
-    logs.push(`${jsonMsg.translate ? jsonMsg.translate : 'message'}: ${message}\n`)
+    console.log(message, obj2str(jsonMsg), `Health: ${hp}`)
+    logs.push(`${jsonMsg.translate ? jsonMsg.translate : 'message'}: ${message}`)
     logMsg(logs[logs.length - 1])
     if (spawned && username) {
       if (message.match(bot.player.username)) {
@@ -157,6 +165,9 @@ function initBot() {
       if (message.match(/[Jj][Oo][Ii][Nn][Ee][Dd]/)) {
         bot.chat(`wb ${username}!`)
       }
+    }
+    if (hp < 10) {
+      stopBot()
     }
   })
 }
